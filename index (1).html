@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#f9bfd1">
+<meta name="description" content="A living emotional universe - only for you">
+<title>Only Yours</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#fff6f9;
+  --bg-2:#ffe9f1;
+  --card:#fffafd;
+  --ink:#321020;
+  --muted:#95506b;
+  --primary:#e8275a;
+  --primary-2:#ff74a2;
+  --gold:#f19932;
+  --line:rgba(203,78,116,.24);
+  --soft:rgba(232,39,90,.08);
+  --shadow:0 18px 58px rgba(232,39,90,.14);
+  --radius:22px;
+  --radius-sm:14px;
+  --fast:all .28s ease;
+  --spring:all .55s cubic-bezier(.22,1,.36,1);
+  --mood:#e8275a;
+  font-family:Nunito,system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;color:var(--ink);background:linear-gradient(145deg,#fff6f9 0%,#ffe4ee 46%,#fff9fb 100%)}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.62}
+.progress-wrap{position:fixed;top:0;left:0;right:0;height:4px;background:rgba(232,39,90,.08);z-index:80}
+.progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--gold),var(--primary-2));box-shadow:0 0 16px rgba(232,39,90,.32);transition:width .45s}
+#preloader{position:fixed;inset:0;z-index:200;display:grid;place-items:center;background:linear-gradient(145deg,#fff6f9,#ffe5ef);transition:opacity .7s,visibility .7s}
+#preloader.done{opacity:0;visibility:hidden}
+.loader-inner{text-align:center}
+.loader-heart{font-size:4rem;animation:heartbeat 1.2s infinite}
+.loader-text{margin-top:18px;font:700 1.45rem "Dancing Script",cursive;color:var(--primary)}
+@keyframes heartbeat{0%,100%{transform:scale(1)}16%{transform:scale(1.18)}32%{transform:scale(1)}48%{transform:scale(1.12)}}
+.screen{position:fixed;inset:0;z-index:10;display:none;align-items:center;justify-content:center;padding:20px 16px 82px;overflow-y:auto;opacity:0;transform:translateY(18px) scale(.97);transition:var(--spring)}
+.screen.active{display:flex;opacity:1;transform:none}
+.card{width:100%;max-width:560px;position:relative;overflow:hidden;background:rgba(255,250,253,.9);border:1.5px solid var(--line);border-radius:var(--radius);padding:30px;box-shadow:var(--shadow);backdrop-filter:blur(14px)}
+.card.wide{max-width:680px}
+.card:before{content:"";position:absolute;inset:-60% -40% auto auto;width:320px;height:320px;background:radial-gradient(circle,rgba(255,116,162,.18),transparent 65%);pointer-events:none}
+.deco{position:absolute;top:14px;right:18px;font-size:1.35rem;opacity:.22;animation:floaty 4s ease-in-out infinite}
+@keyframes floaty{50%{transform:translateY(-9px) rotate(8deg)}}
+h1,h2{font-family:"Dancing Script",cursive;text-align:center;line-height:1.08;color:var(--ink)}
+h1{font-size:clamp(2.1rem,6vw,3.25rem)}
+h2{font-size:clamp(1.75rem,5vw,2.6rem)}
+h3{font-size:1.08rem;text-align:center;margin-bottom:12px;color:var(--ink)}
+p{font-size:.94rem;line-height:1.72;color:var(--muted);text-align:center}
+.signature{min-height:3.2em;margin:16px 0 10px;text-align:center;font:700 clamp(1.35rem,4.8vw,2.1rem) "Dancing Script",cursive;line-height:1.42;background:linear-gradient(135deg,var(--primary),var(--gold),var(--primary-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn{width:auto;min-height:48px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border:0;border-radius:999px;background:linear-gradient(135deg,var(--primary),#cf1648);color:white;font-weight:900;box-shadow:0 10px 28px rgba(232,39,90,.23);transition:var(--fast);text-decoration:none}
+.btn:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(232,39,90,.32)}
+.btn:active{transform:scale(.97)}
+.btn.outline{background:transparent;color:var(--primary);border:2px solid rgba(232,39,90,.22);box-shadow:none}
+.btn.ghost{background:transparent;color:var(--muted);box-shadow:none;border:1px solid transparent}
+.btn.ghost:hover{border-color:var(--line);background:rgba(232,39,90,.04)}
+.w100{width:100%}.mt1{margin-top:10px}.mt2{margin-top:18px}.small{font-size:.82rem}
+.hero-photo{height:190px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(135deg,rgba(232,39,90,.1),rgba(255,255,255,.6)),url("https://wallpapers-clan.com/wp-content/uploads/2024/03/anime-girl-with-heart-shaped-balloons-desktop-wallpaper-cover.jpg") center/cover;box-shadow:inset 0 0 0 999px rgba(255,240,247,.14);margin:0 0 18px}
+.memory-photo{height:180px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(0deg,rgba(45,10,26,.16),rgba(255,255,255,.05)),url("https://wallpapers.com/images/hd/cute-anime-couple-holding-hands-sunset-6st7c0vnw0wffssj.jpg") center/cover;margin:14px 0}.kiss-photo{height:210px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(0deg,rgba(232,39,90,.08),rgba(255,255,255,.04)),url("https://wallpapers.com/images/hd/anime-couple-kiss-during-beautiful-sunset-mtgwc3w2kv7boyg1.jpg") center/cover;margin:14px 0 18px;box-shadow:0 14px 34px rgba(232,39,90,.13)}
+.photo-caption{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.76);color:var(--primary);font-weight:900;font-size:.78rem;margin-top:116px;margin-left:12px;box-shadow:0 8px 24px rgba(232,39,90,.14)}
+.qr-row{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center;margin:18px 0}
+.qr-box{width:150px;height:150px;padding:10px;border-radius:18px;background:#fff;display:grid;place-items:center;box-shadow:0 10px 30px rgba(232,39,90,.13)}
+.qr-box canvas,.qr-box img{width:130px!important;height:130px!important}
+.input{width:100%;padding:15px 18px;border:2px solid var(--line);border-radius:16px;background:rgba(255,255,255,.72);outline:none;text-align:center;font:800 1.12rem Nunito,sans-serif;letter-spacing:4px;color:var(--ink);transition:var(--fast)}
+.input:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(232,39,90,.08)}
+.shake{animation:shake .45s}@keyframes shake{20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.counter-grid,.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0}
+.stat{padding:15px 6px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(135deg,rgba(232,39,90,.075),rgba(255,255,255,.35));text-align:center}
+.num{display:block;font:900 clamp(1.35rem,4vw,2.1rem) "Dancing Script",cursive;color:var(--primary)}
+.label{display:block;margin-top:5px;font-size:.65rem;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);font-weight:900}
+.gift-box{width:142px;height:142px;position:relative;margin:24px auto;cursor:pointer;transition:var(--fast)}
+.gift-box:hover{transform:scale(1.05)}
+.gift-lid{position:absolute;top:0;left:-10%;width:120%;height:32%;z-index:2;border-radius:10px 10px 5px 5px;background:linear-gradient(135deg,var(--primary),#c81242);transition:transform .65s;transform-origin:left center}
+.gift-box.opened .gift-lid{transform:rotate(-108deg) translateY(-10px)}
+.gift-body{position:absolute;bottom:0;left:0;width:100%;height:72%;border:2px solid var(--line);border-radius:0 0 14px 14px;background:linear-gradient(180deg,#fff,#ffe1ec);display:grid;place-items:center;font-size:3rem}
+.gift-ribbon{position:absolute;top:0;left:50%;transform:translateX(-50%);width:19%;height:100%;z-index:3;background:linear-gradient(180deg,var(--gold),#df7a22)}
+.modal{position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(255,217,231,.7);backdrop-filter:blur(10px)}
+.modal.show{display:flex}
+.modal-card{position:relative;max-width:460px;width:100%;padding:34px;border-radius:var(--radius);border:1.5px solid var(--line);background:var(--card);box-shadow:var(--shadow);text-align:center;animation:pop .35s}
+@keyframes pop{from{transform:scale(.9);opacity:.4}}
+.close{position:absolute;top:12px;right:12px;width:34px;height:34px;border:0;border-radius:50%;background:var(--bg-2);color:var(--primary);font-weight:900}
+.mood-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:18px 0}
+.mood-card{min-height:82px;border:1.5px solid var(--line);border-radius:16px;background:linear-gradient(135deg,rgba(255,182,193,.18),rgba(255,255,255,.5));display:grid;place-items:center;padding:10px 6px;transition:var(--fast)}
+.mood-card:hover{transform:translateY(-2px);border-color:var(--mood)}
+.mood-card.selected{border-color:var(--mood);background:linear-gradient(135deg,rgba(232,39,90,.14),rgba(255,255,255,.55));box-shadow:0 10px 24px rgba(232,39,90,.13)}
+.mood-card b{font-size:1.75rem}.mood-card span{font-size:.74rem;color:var(--muted);font-weight:900}
+.submit-mood{opacity:.45;pointer-events:none}.submit-mood.ready{opacity:1;pointer-events:auto;animation:heartbeat 1.8s infinite}
+.exp-progress{display:flex;gap:8px;justify-content:center;margin-bottom:18px}.exp-dot{height:8px;width:30px;border-radius:999px;background:rgba(232,39,90,.16)}.exp-dot.active{background:var(--primary)}.exp-dot.done{background:rgba(232,39,90,.42)}
+.tag{display:inline-flex;margin:0 auto 12px;padding:6px 13px;border-radius:999px;background:rgba(232,39,90,.1);color:var(--primary);font-size:.76rem;font-weight:900;text-transform:uppercase;letter-spacing:.8px}
+.center{text-align:center}.exp-art{height:160px;border-radius:18px;border:1px solid var(--line);margin:10px 0 14px;background:linear-gradient(135deg,rgba(255,116,162,.18),rgba(255,255,255,.28)),var(--img) center/cover}
+.letter,.message-box{padding:20px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,#fff,#ffeaf2);line-height:1.82;color:var(--ink);font-style:italic}
+.list{display:grid;gap:9px}.pill{padding:13px 15px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.58);font-weight:800;color:var(--ink);animation:fadeUp .4s both}.pill:nth-child(2){animation-delay:.07s}.pill:nth-child(3){animation-delay:.14s}.pill:nth-child(4){animation-delay:.21s}.pill:nth-child(5){animation-delay:.28s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}}
+.meme{background:#fff;border:3px solid var(--primary);border-radius:18px;padding:18px;text-align:center;box-shadow:0 12px 30px rgba(232,39,90,.14)}
+.meme .top,.meme .bottom{text-transform:uppercase;font-weight:900}.meme .top{color:var(--muted);font-size:.88rem}.meme .mid{font-size:3rem;margin:8px 0}.meme .bottom{color:var(--primary);font-size:1.05rem}
+.breathe{width:122px;height:122px;margin:20px auto;border:3px solid var(--primary);border-radius:50%;display:grid;place-items:center;text-align:center;color:var(--primary);font-weight:900;animation:breathe 5s infinite}
+@keyframes breathe{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(232,39,90,.22)}50%{transform:scale(1.36);box-shadow:0 0 0 22px rgba(232,39,90,0)}}
+.like-btn{width:100%;padding:13px;border:2px solid rgba(232,39,90,.24);border-radius:999px;background:transparent;color:var(--muted);font-weight:900;margin-top:14px}.like-btn.liked{background:linear-gradient(135deg,var(--primary),#cf1648);color:#fff;border-color:transparent}
+.wheel-container{position:relative;width:270px;height:270px;margin:20px auto}.wheel-pointer{position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:24px solid var(--primary);z-index:3}#wheel-canvas{width:100%;height:100%;transition:transform 4s cubic-bezier(.17,.67,.12,.99);filter:drop-shadow(0 10px 24px rgba(232,39,90,.2))}
+.wheel-result{display:none;margin-top:16px;padding:17px;border:1px solid var(--line);border-radius:18px;background:#fff;text-align:center;font-weight:800}.wheel-result.show{display:block;animation:pop .35s}.wheel-result img{width:100%;height:130px;object-fit:cover;border-radius:14px;margin-bottom:10px}
+.kiss-btn{width:104px;height:104px;border-radius:50%;border:0;background:linear-gradient(135deg,var(--primary),#cf1648);font-size:2.8rem;color:white;margin:20px auto;display:grid;place-items:center;box-shadow:0 12px 44px rgba(232,39,90,.32);animation:pulse 2s infinite}@keyframes pulse{50%{box-shadow:0 12px 62px rgba(232,39,90,.5);transform:scale(1.05)}}
+.echo-text{position:absolute;pointer-events:none;color:var(--primary);font-weight:900;animation:echo 2s forwards}@keyframes echo{to{opacity:0;transform:translateY(-100px) scale(1.6)}}
+.react-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0}.react-btn{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:white;color:var(--ink);font-weight:900}.react-btn.selected{background:var(--primary);color:white;border-color:var(--primary)}
+.canvas-wrap{background:white;border:2px solid var(--line);border-radius:18px;overflow:hidden;margin:14px 0}#draw-canvas{display:block;width:100%;height:245px;touch-action:none;cursor:crosshair}
+.canvas-tools{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}.color-dot{width:28px;height:28px;border-radius:50%;border:2px solid transparent;box-shadow:0 3px 10px rgba(0,0,0,.12)}.color-dot.active{border-color:var(--ink)}
+textarea{width:100%;min-height:96px;margin-top:12px;padding:14px 16px;border:1.5px solid var(--line);border-radius:16px;background:rgba(255,255,255,.72);color:var(--ink);outline:none;resize:none}
+.summary-msg{padding:17px 18px;border-left:4px solid var(--primary);border-radius:16px;background:linear-gradient(135deg,rgba(232,39,90,.08),rgba(255,255,255,.58));text-align:left;color:var(--ink);line-height:1.75;margin:16px 0}
+.nav-bar{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:70;display:flex;gap:8px;align-items:center;max-width:calc(100vw - 20px);padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(255,246,249,.9);backdrop-filter:blur(14px);box-shadow:0 10px 34px rgba(232,39,90,.13);opacity:0;pointer-events:none;transition:var(--fast)}
+.nav-bar.visible{opacity:1;pointer-events:auto}.nav-btn{width:32px;height:32px;border:0;border-radius:50%;background:rgba(232,39,90,.1);color:var(--primary);font-weight:900}.nav-dot{width:9px;height:9px;border-radius:999px;background:rgba(232,39,90,.22)}.nav-dot.active{width:23px;background:var(--primary)}
+#toast-container{position:fixed;right:18px;top:18px;z-index:170;display:grid;gap:8px}.toast{max-width:290px;padding:12px 18px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.96);box-shadow:0 10px 28px rgba(232,39,90,.15);font-weight:900;color:var(--ink);transform:translateX(130%);transition:transform .32s}.toast.show{transform:none}
+@media(max-width:560px){
+  .card{padding:23px 16px}.qr-row{grid-template-columns:1fr}.qr-box{margin:auto}.counter-grid,.stats-grid{grid-template-columns:repeat(2,1fr)}.mood-grid{gap:7px}.mood-card{min-height:74px}.wheel-container{width:226px;height:226px}#draw-canvas{height:214px}.nav-dot:nth-of-type(n+8){display:none}
+}
+
+.quiz-wrap{display:grid;gap:12px;margin:18px 0}
+.quiz-q{font:800 1.05rem Nunito,sans-serif;color:var(--ink);text-align:center;margin-bottom:6px}
+.quiz-opt{width:100%;padding:14px 16px;border:2px solid var(--line);border-radius:16px;background:rgba(255,255,255,.65);color:var(--ink);font-weight:800;text-align:left;transition:var(--fast)}
+.quiz-opt:hover{border-color:var(--primary);background:rgba(232,39,90,.06)}
+.quiz-opt.selected{border-color:var(--primary);background:linear-gradient(135deg,rgba(232,39,90,.12),rgba(255,255,255,.5))}
+.quiz-progress{display:flex;gap:6px;justify-content:center;margin-bottom:14px}.quiz-dot{height:7px;width:22px;border-radius:999px;background:rgba(232,39,90,.14)}.quiz-dot.done{background:var(--primary)}.quiz-dot.active{background:var(--gold)}
+.quiz-result{padding:18px;border:2px solid var(--line);border-radius:18px;background:linear-gradient(135deg,rgba(232,39,90,.08),rgba(255,255,255,.55));text-align:center;margin:14px 0}
+.quiz-result b{display:block;font-size:1.35rem;color:var(--primary);margin-bottom:6px}
+.constellation-canvas{width:100%;height:320px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(180deg,#0a0a1a,#1a0b2e);margin:14px 0;position:relative;overflow:hidden}
+.constellation-canvas canvas{display:block;width:100%;height:100%}
+.garden-canvas{width:100%;height:300px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(180deg,#e8f5e9,#c8e6c9);margin:14px 0;position:relative;overflow:hidden}
+.garden-canvas canvas{display:block;width:100%;height:100%}
+.garden-info{text-align:center;font-size:.9rem;color:var(--muted);margin-bottom:10px}
+
+</style>
+<noscript><style>#preloader{display:none!important}.screen{display:none!important}#entry-screen{display:flex!important;opacity:1!important;transform:none!important}</style></noscript>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+<div id="preloader"><div class="loader-inner"><div class="loader-heart">💖</div><div class="loader-text">Loading our little world...</div></div></div>
+<div id="toast-container"></div>
+
+<div class="modal" id="gift-modal">
+  <div class="modal-card">
+    <button class="close" onclick="Daily.closeModal()">x</button>
+    <div style="font-size:3.5rem" id="gift-emoji">🎁</div>
+    <div class="message-box mt1" id="gift-text"></div>
+    <p class="mt1" id="gift-streak"></p>
+    <button class="btn w100 mt2" onclick="Daily.closeModal()">Close and continue 💖</button>
+  </div>
+</div>
+
+<section class="screen active" id="entry-screen">
+  <div class="card">
+    <div class="deco">💖</div>
+    <div class="hero-photo"></div>
+    <h1>Welcome, Love</h1>
+    <div class="signature" id="entry-text"></div>
+    <p>Don't open unless you're ready for a tiny universe made only for you.</p>
+    <button class="btn w100 mt2" onclick="App.goTo('memory')">Open my heart 💖</button>
+    <button class="btn ghost w100 mt1" onclick="App.goTo('share')">Get share link and QR</button>
+  </div>
+</section>
+
+<section class="screen" id="memory-screen">
+  <div class="card">
+    <div class="deco">🔐</div>
+    <h2>Memory Lock</h2>
+    <div class="memory-photo"><span class="photo-caption">Our first hug memory</span></div>
+    <p>"You remember that day, right? That moment wasn't normal..."</p>
+    <p class="small mt1">Enter the date of our first hug</p>
+    <input class="input mt1" id="pass-input" placeholder="DD/MM/YYYY" maxlength="10" autocomplete="off" inputmode="numeric" oninput="Memory.format(this)">
+    <button class="btn w100 mt2" onclick="Memory.check()">Unlock 🔓</button>
+    <button class="btn ghost w100 mt1" onclick="App.goTo('entry')">Back</button>
+  </div>
+</section>
+
+<section class="screen" id="counter-screen">
+  <div class="card">
+    <div class="deco">⏳</div>
+    <h2>Since Everything Changed</h2>
+    <p class="mt1">06/10/2025 - The day our story began</p>
+    <div style="font-size:3.2rem;text-align:center;margin:15px 0;animation:heartbeat 1.6s infinite">💖</div>
+    <div class="counter-grid">
+      <div class="stat"><span class="num" id="cd-days">0</span><span class="label">Days</span></div>
+      <div class="stat"><span class="num" id="cd-hours">0</span><span class="label">Hours</span></div>
+      <div class="stat"><span class="num" id="cd-mins">0</span><span class="label">Minutes</span></div>
+      <div class="stat"><span class="num" id="cd-secs">0</span><span class="label">Seconds</span></div>
+    </div>
+    <p id="milestone" style="color:var(--gold);font-weight:900"></p>
+    <p id="time-greet" class="mt1"></p>
+    <button class="btn w100 mt2" onclick="App.goTo('daily')">Continue</button>
+  </div>
+</section>
+
+<section class="screen" id="daily-screen">
+  <div class="card">
+    <div class="deco">🎁</div>
+    <h2>Today's Surprise</h2>
+    <p class="mt1">One gift per day. Come back tomorrow for more.</p>
+    <div class="gift-box" id="gift-box" onclick="Daily.open()">
+      <div class="gift-lid"></div><div class="gift-ribbon"></div><div class="gift-body">🎁</div>
+    </div>
+    <p id="daily-countdown"></p>
+    <button class="btn w100 mt2" onclick="App.goTo('mood')">Continue</button>
+  </div>
+</section>
+
+<section class="screen" id="mood-screen">
+  <div class="card wide">
+    <div class="deco">😊</div>
+    <h2>How Are You Feeling?</h2>
+    <p class="mt1">Pick your mood first. Then submit it, and I will shape the next five experiences around it.</p>
+    <div class="mood-grid" id="mood-grid"></div>
+    <button class="btn w100 mt1 submit-mood" id="mood-submit" onclick="Mood.submit()">
+      <span id="mood-submit-text">Select your mood first</span> <span id="mood-submit-emoji">💭</span>
+    </button>
+  </div>
+</section>
+
+<section class="screen" id="quiz-screen">
+  <div class="card wide">
+    <div class="deco">💕</div>
+    <h2>How Do You Feel Loved?</h2>
+    <p class="mt1">5 questions. No wrong answers. Just you.</p>
+    <div class="quiz-progress" id="quiz-progress"></div>
+    <div id="quiz-content"></div>
+  </div>
+</section>
+
+<section class="screen" id="experiences-screen">
+  <div class="card wide">
+    <div class="exp-progress" id="exp-progress"></div>
+    <div class="center"><span class="tag" id="exp-tag"></span></div>
+    <div id="exp-content"></div>
+    <button class="like-btn" id="like-btn" onclick="Exp.like()">🤍 I loved this</button>
+    <button class="btn w100 mt1" id="exp-next" onclick="Exp.next()">Next experience</button>
+  </div>
+</section>
+
+<section class="screen" id="wheel-screen">
+  <div class="card" style="text-align:center">
+    <div class="deco">🎲</div>
+    <h2>Fate's Wheel</h2>
+    <p class="mt1">Now the universe gets one spin.</p>
+    <div class="wheel-container"><canvas id="wheel-canvas" width="540" height="540"></canvas><div class="wheel-pointer"></div></div>
+    <button class="btn w100" id="spin-btn" onclick="Wheel.spin()">Spin the wheel 🎲</button>
+    <div class="wheel-result" id="wheel-result"></div>
+    <button class="btn outline w100 mt1" id="wheel-next" style="display:none" onclick="App.goTo('kiss')">Continue to the peak</button>
+  </div>
+</section>
+
+<section class="screen" id="kiss-screen">
+  <div class="card" style="text-align:center">
+    <div class="deco">💋</div>
+    <div class="kiss-photo"></div>
+    <div style="font-size:4rem;animation:heartbeat 1.3s infinite">💖</div>
+    <h2>This Is For You</h2>
+    <p id="kiss-text" class="mt2" style="font-weight:800;color:var(--ink)"></p>
+    <button class="kiss-btn" onclick="Kiss.tap()">💋</button>
+    <p>Kisses sent: <b id="kiss-count">0</b></p>
+    <div id="echo-container" style="position:relative;height:64px"></div>
+    <button class="btn outline w100 mt2" onclick="App.goTo('constellation')">Our stars ✨</button>
+  </div>
+</section>
+
+<section class="screen" id="constellation-screen">
+  <div class="card">
+    <div class="deco">✨</div>
+    <h2>Our Stars</h2>
+    <p class="mt1">The sky looked like this on 06/10/2025. I drew a heart around the brightest one — that is you.</p>
+    <div class="constellation-canvas"><canvas id="constellation-canvas" width="560" height="320"></canvas></div>
+    <p class="small">Every star is placed by the date we began. Every line leads back to you.</p>
+    <button class="btn w100 mt2" onclick="App.goTo('draw')">Continue</button>
+  </div>
+</section>
+
+<section class="screen" id="draw-screen">
+  <div class="card wide">
+    <div class="deco">🎨</div>
+    <h2>Your Canvas</h2>
+    <p class="mt1">React to everything, draw something, and send me your reply.</p>
+    <div class="react-bar" id="react-bar"></div>
+    <div class="canvas-wrap"><canvas id="draw-canvas" width="560" height="245"></canvas></div>
+    <div class="canvas-tools">
+      <button class="color-dot active" style="background:#e8275a" data-c="#e8275a" onclick="Draw.setColor(this)" aria-label="Pink"></button>
+      <button class="color-dot" style="background:#ff9ec0" data-c="#ff9ec0" onclick="Draw.setColor(this)" aria-label="Light pink"></button>
+      <button class="color-dot" style="background:#f19932" data-c="#f19932" onclick="Draw.setColor(this)" aria-label="Gold"></button>
+      <button class="color-dot" style="background:#7c3aed" data-c="#7c3aed" onclick="Draw.setColor(this)" aria-label="Purple"></button>
+      <button class="color-dot" style="background:#321020" data-c="#321020" onclick="Draw.setColor(this)" aria-label="Ink"></button>
+      <input type="range" min="1" max="24" value="5" oninput="Draw.setSize(this.value)" aria-label="Brush size">
+      <button class="btn ghost" onclick="Draw.clear()">Clear</button>
+      <button class="btn ghost" onclick="Draw.save()">Save</button>
+    </div>
+    <textarea id="msg-input" placeholder="Write me a little message... anything."></textarea>
+    <button class="btn w100 mt1" onclick="Draw.sendMsg()">Send to my email</button>
+    <button class="btn outline w100 mt1" onclick="App.goTo('summary')">Skip to summary</button>
+  </div>
+</section>
+
+<section class="screen" id="summary-screen">
+  <div class="card">
+    <div class="deco">🌅</div>
+    <h2>Everything You Did</h2>
+    <div class="stats-grid">
+      <div class="stat"><span class="num" id="sum-mood">-</span><span class="label">Mood</span></div>
+      <div class="stat"><span class="num" id="sum-liked">0</span><span class="label">Loved</span></div>
+      <div class="stat"><span class="num" id="sum-kisses">0</span><span class="label">Kisses</span></div>
+      <div class="stat"><span class="num" id="sum-reaction">-</span><span class="label">Reaction</span></div>
+    </div>
+    <div class="summary-msg" id="summary-msg"></div>
+    <p id="summary-sub"></p>
+    <button class="btn w100 mt2" onclick="App.goTo('garden')">See our garden 🌸</button>
+  </div>
+</section>
+
+<section class="screen" id="share-screen">
+  <div class="card">
+    <div class="deco">🔗</div>
+    <h2>Share This Love</h2>
+    <div class="qr-row">
+      <div class="qr-box" id="qr-box"></div>
+      <div>
+        <p class="small">This QR uses the current page URL. When you host the file on Netlify or GitHub Pages, it will automatically point there.</p>
+        <p class="small mt1" id="share-url" style="word-break:break-all;color:var(--ink);font-weight:800"></p>
+      </div>
+    </div>
+    <button class="btn w100" onclick="Share.copy()">Copy link</button>
+    <button class="btn ghost w100 mt1" onclick="App.goTo('entry')">Back home</button>
+  </div>
+</section>
+
+<section class="screen" id="garden-screen">
+  <div class="card wide">
+    <div class="deco">🌸</div>
+    <h2>Our Garden</h2>
+    <p class="mt1">Every time you visit, a new flower grows. This is what our love looks like so far.</p>
+    <div class="garden-info" id="garden-info"></div>
+    <div class="garden-canvas"><canvas id="garden-canvas" width="680" height="300"></canvas></div>
+    <button class="btn w100 mt2" onclick="App.goTo('return')">Finish the journey</button>
+  </div>
+</section>
+
+<section class="screen" id="return-screen">
+  <div class="card" style="text-align:center">
+    <div class="deco">🌸</div>
+    <h2>Until Next Time</h2>
+    <p class="mt1">This isn't goodbye. It's a "see you tomorrow."</p>
+    <div class="stats-grid">
+      <div class="stat"><span class="num" id="ret-streak">0</span><span class="label">Streak</span></div>
+      <div class="stat"><span class="num" id="ret-visits">1</span><span class="label">Visits</span></div>
+      <div class="stat"><span class="num" id="ret-mood">-</span><span class="label">Mood</span></div>
+      <div class="stat"><span class="num" id="ret-kisses">0</span><span class="label">Kisses</span></div>
+    </div>
+    <p id="return-msg" style="font-weight:900;color:var(--primary)"></p>
+    <button class="btn w100 mt2" onclick="App.restart()">Experience again</button>
+    <button class="btn outline w100 mt1" onclick="App.goTo('entry')">Home</button>
+  </div>
+</section>
+
+<nav class="nav-bar" id="nav-bar">
+  <button class="nav-btn" onclick="App.prev()">‹</button>
+  <span class="nav-dot" onclick="App.goTo('entry')"></span>
+  <span class="nav-dot" onclick="App.goTo('memory')"></span>
+  <span class="nav-dot" onclick="App.goTo('counter')"></span>
+  <span class="nav-dot" onclick="App.goTo('daily')"></span>
+  <span class="nav-dot" onclick="App.goTo('mood')"></span>
+  <span class="nav-dot" onclick="App.goTo('quiz')"></span>
+  <span class="nav-dot" onclick="App.goTo('experiences')"></span>
+  <span class="nav-dot" onclick="App.goTo('wheel')"></span>
+  <span class="nav-dot" onclick="App.goTo('kiss')"></span>
+  <span class="nav-dot" onclick="App.goTo('constellation')"></span>
+  <span class="nav-dot" onclick="App.goTo('draw')"></span>
+  <span class="nav-dot" onclick="App.goTo('summary')"></span>
+  <span class="nav-dot" onclick="App.goTo('garden')"></span>
+  <span class="nav-dot" onclick="App.goTo('return')"></span>
+  <button class="nav-btn" onclick="App.next()">›</button>
+</nav>
+
+<script>
+const CONFIG={
+  START_DATE:"2025-10-06T00:00:00",
+  PASSWORD:"11102025",
+  SIGNATURE:"Chal meri jaan... tujhe apne pyaar ki sair karata hoon.",
+  EMAIL_TO:"aalifgawandi45@gmail.com"
+};
+const State={
+  current:"entry",unlocked:false,mood:null,moodEmoji:null,moodLabel:null,loveLanguage:null,loveLanguageIdx:null,lastVisit:null,streak:0,visits:0,
+  giftsOpened:[],kisses:0,likedExps:0,expIndex:0,reaction:null,drewSomething:false,sentMsg:false,wheelResult:null
+};
+const $=id=>document.getElementById(id);
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const randItem=a=>a[Math.floor(Math.random()*a.length)];
+function toast(msg){const el=document.createElement("div");el.className="toast";el.textContent=msg;$("toast-container").appendChild(el);requestAnimationFrame(()=>el.classList.add("show"));setTimeout(()=>{el.classList.remove("show");setTimeout(()=>el.remove(),350)},2900)}
+const Store={
+  key:"only_yours_v4",
+  load(){
+    try{Object.assign(State,JSON.parse(localStorage.getItem(this.key)||"{}"))}catch(e){}
+    const today=new Date().toDateString();
+    const last=State.lastVisit?new Date(State.lastVisit).toDateString():null;
+    if(last&&last!==today){
+      const diff=Math.round((new Date(today)-new Date(last))/86400000);
+      State.streak=diff===1?(State.streak||0)+1:1;
+    }else if(!State.streak){State.streak=1}
+    State.visits=(State.visits||0)+1;
+    State.lastVisit=new Date().toISOString();
+    this.save();
+  },
+  save(){try{localStorage.setItem(this.key,JSON.stringify(State))}catch(e){}}
+};
+Store.load();
+const Particles={
+  c:$("bg-canvas"),ctx:null,items:[],
+  init(){this.ctx=this.c.getContext("2d");this.resize();addEventListener("resize",()=>this.resize());this.loop();setInterval(()=>this.spawn(Math.random()*this.c.width,this.c.height+16,1),1150)},
+  resize(){this.c.width=innerWidth;this.c.height=innerHeight},
+  spawn(x,y,n=1){for(let i=0;i<n;i++)this.items.push({x:x||Math.random()*this.c.width,y:y||this.c.height+10,vx:(Math.random()-.5)*1.3,vy:-(Math.random()*1.2+.35),s:Math.random()*15+7,a:Math.random()*.45+.22,l:1,d:Math.random()*.004+.002,r:Math.random()*6,rs:(Math.random()-.5)*.025})},
+  burst(x,y,n=30){for(let i=0;i<n;i++)this.items.push({x,y,vx:(Math.random()-.5)*12,vy:(Math.random()-.5)*12,s:Math.random()*15+6,a:1,l:1,d:Math.random()*.023+.01,r:Math.random()*6,rs:(Math.random()-.5)*.1})},
+  loop(){const c=this.c,ctx=this.ctx;ctx.clearRect(0,0,c.width,c.height);this.items=this.items.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.l-=p.d;p.r+=p.rs;if(p.l<=0)return false;ctx.save();ctx.globalAlpha=p.l*p.a;ctx.translate(p.x,p.y);ctx.rotate(p.r);const s=p.s*p.l;ctx.fillStyle=Math.random()>.08?"#e8275a":"#f19932";ctx.beginPath();ctx.moveTo(0,s/4);ctx.bezierCurveTo(0,0,-s/2,0,-s/2,s/4);ctx.bezierCurveTo(-s/2,s/2,0,s,0,s);ctx.bezierCurveTo(0,s,s/2,s/2,s/2,s/4);ctx.bezierCurveTo(s/2,0,0,0,0,s/4);ctx.fill();ctx.restore();return true});requestAnimationFrame(()=>this.loop())}
+};
+const App={
+  screens:["entry","memory","counter","daily","mood","quiz","experiences","wheel","kiss","constellation","draw","summary","garden","return"],
+  goTo(name){
+    if(!["entry","memory","share"].includes(name)&&!State.unlocked){toast("Unlock the memory first");return this.goTo("memory")}
+    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+    const el=$(name+"-screen");if(!el)return;el.classList.add("active");State.current=name;Store.save();this.nav();this.progress();
+    if(name==="counter")Counter.start();if(name==="daily")Daily.init();if(name==="mood")Mood.init();if(name==="experiences")Exp.init();if(name==="wheel")Wheel.init();if(name==="kiss")Kiss.init();if(name==="draw")Draw.init();if(name==="quiz")Quiz.init();if(name==="constellation")Constellation.init();if(name==="garden")Garden.init();if(name==="summary")Summary.init();if(name==="return")Return.init();if(name==="share")Share.init();
+    Particles.spawn(Math.random()*innerWidth,innerHeight+12,4);
+  },
+  prev(){const i=this.screens.indexOf(State.current);if(i>0)this.goTo(this.screens[i-1])},
+  next(){const i=this.screens.indexOf(State.current);if(i<this.screens.length-1)this.goTo(this.screens[i+1])},
+  nav(){const nav=$("nav-bar");nav.classList.toggle("visible",!["entry","share"].includes(State.current));document.querySelectorAll(".nav-dot").forEach((d,i)=>d.classList.toggle("active",this.screens[i]===State.current))},
+  progress(){const i=Math.max(0,this.screens.indexOf(State.current));$("progress-bar").style.width=(i/(this.screens.length-1)*100)+"%"},
+  restart(){State.kisses=0;State.likedExps=0;State.expIndex=0;State.reaction=null;State.drewSomething=false;State.sentMsg=false;State.wheelResult=null;Store.save();this.goTo("entry")}
+};
+const Entry={
+  init(){
+    const el=$("entry-text");el.textContent="";let i=0,text=CONFIG.SIGNATURE;
+    const type=()=>{if(i<=text.length){el.textContent=text.slice(0,i++);setTimeout(type,42+Math.random()*28)}};setTimeout(type,500)
+  }
+};
+const Memory={
+  format(inp){let v=inp.value.replace(/\D/g,"");if(v.length>2)v=v.slice(0,2)+"/"+v.slice(2);if(v.length>5)v=v.slice(0,5)+"/"+v.slice(5);inp.value=v.slice(0,10)},
+  async check(){const inp=$("pass-input"),raw=inp.value.replace(/\D/g,"");if(raw===CONFIG.PASSWORD){State.unlocked=true;Store.save();toast("Unlocked. Only you would know this.");Particles.burst(innerWidth/2,innerHeight/2,48);await sleep(850);App.goTo("counter")}else{inp.classList.add("shake");toast("Wrong date... try again");setTimeout(()=>inp.classList.remove("shake"),480)}}
+};
+const Counter={
+  iv:null,start(){clearInterval(this.iv);this.update();this.iv=setInterval(()=>this.update(),1000)},
+  update(){const diff=Date.now()-new Date(CONFIG.START_DATE).getTime();if(diff<0)return;const days=Math.floor(diff/86400000),h=Math.floor(diff/3600000%24),m=Math.floor(diff/60000%60),s=Math.floor(diff/1000%60);$("cd-days").textContent=days;$("cd-hours").textContent=h;$("cd-mins").textContent=m;$("cd-secs").textContent=s;$("milestone").textContent=days>=200?"200 magical days and counting.":days>=100?"100 days of you.":days>=30?"30 days of magic.":days>=7?"One week down, forever to go.":"";const hour=new Date().getHours();$("time-greet").textContent=hour<12?"Good morning, my love.":hour<17?"Good afternoon, beautiful.":hour<21?"Good evening, my heart.":"You light up my darkest nights."}
+};
+const Daily={
+  data:[
+    ["💌","You are my first thought in the morning and my last prayer at night."],
+    ["😏","If kisses were snowflakes, I would send you a blizzard."],
+    ["🌙","Tere ishq mein dooba hoon itna,<br>ke saans bhi ab tera naam leti hai."],
+    ["🤗","Remember that first hug on 11/10? Nothing felt the same after that."],
+    ["💖","In a world of temporary things, you are my forever."]
+  ],
+  init(){const last=State.giftsOpened.at(-1),today=new Date().toDateString();$("gift-box").classList.toggle("opened",!!last&&new Date(last.date).toDateString()===today);$("daily-countdown").textContent=$("gift-box").classList.contains("opened")?"Come back tomorrow for another surprise.":"Tap the gift to unlock today's surprise."},
+  open(){const last=State.giftsOpened.at(-1),today=new Date().toDateString();if(last&&new Date(last.date).toDateString()===today)return toast("Already opened today. Come back tomorrow.");$("gift-box").classList.add("opened");setTimeout(()=>{const g=randItem(this.data);State.giftsOpened.push({date:new Date().toISOString(),gift:g[1]});Store.save();$("gift-emoji").textContent=g[0];$("gift-text").innerHTML=g[1];$("gift-streak").textContent=`Day ${State.streak} streak`; $("gift-modal").classList.add("show");Particles.burst(innerWidth/2,innerHeight/2,40)},520)},
+  closeModal(){$("gift-modal").classList.remove("show");this.countdown()},
+  countdown(){const upd=()=>{const n=new Date(),t=new Date(n);t.setDate(t.getDate()+1);t.setHours(0,0,0,0);const d=t-n;$("daily-countdown").textContent=`Next gift in ${Math.floor(d/3600000)}h ${Math.floor(d/60000%60)}m ${Math.floor(d/1000%60)}s`};upd();clearInterval(this.iv);this.iv=setInterval(upd,1000)}
+};
+const Mood={
+  emotions:[
+    ["happy","😊","Happy","#f19932"],["inlove","🥰","In Love","#e8275a"],["playful","😏","Playful","#ff7a2f"],
+    ["sad","😢","Sad","#6384d8"],["missing","💭","Missing","#b05cc9"],["tired","😴","Tired","#8992a6"],
+    ["anxious","😰","Anxious","#e25d44"],["overwhelmed","😵","Overwhelmed","#a855f7"],["angry","😠","Angry","#d61f43"],
+    ["hug","🤗","Need Hug","#ff8ab0"],["overthinking","🌀","Overthinking","#7c3aed"],["low","📉","Low","#5d6fb3"],
+    ["silent","🤫","Silent","#6b7280"],["ignored","👤","Ignored","#7f6b7a"],["confused","😕","Confused","#c06bd5"]
+  ],
+  init(){const g=$("mood-grid");g.innerHTML="";this.emotions.forEach(e=>{const b=document.createElement("button");b.className="mood-card";b.dataset.id=e[0];b.innerHTML=`<b>${e[1]}</b><span>${e[2]}</span>`;b.onclick=()=>this.select(e);g.appendChild(b)});if(State.mood){const e=this.emotions.find(x=>x[0]===State.mood);if(e)this.select(e,false)}},
+  select(e,save=true){document.querySelectorAll(".mood-card").forEach(c=>c.classList.remove("selected"));document.querySelector(`[data-id="${e[0]}"]`)?.classList.add("selected");document.documentElement.style.setProperty("--mood",e[3]);State.mood=e[0];State.moodEmoji=e[1];State.moodLabel=e[2];if(save)Store.save();$("mood-submit").classList.add("ready");$("mood-submit-text").textContent=`Submit mood: ${e[2]}`;$("mood-submit-emoji").textContent=e[1]},
+  submit(){if(!State.mood)return toast("Pick a mood first.");State.expIndex=0;Store.save();App.goTo("quiz")}
+};
+const Exp={
+  liked:false,
+  group(){if(["happy","inlove","playful"].includes(State.mood))return"bright";if(["sad","missing","low","ignored"].includes(State.mood))return"soft";if(State.mood==="hug")return"hug";return"calm"},
+  data:{
+    bright:[
+      {tag:"Letter",type:"letter",title:"A Letter From My Heart",img:"url('https://w0.peakpx.com/wallpaper/407/889/HD-wallpaper-anime-couple-moonlight-romance-hugging-scenic-night-anime.jpg')",text:"My love,<br><br>Your smile changes the weather inside me. You make ordinary minutes feel like little festivals, and I swear I could spend forever watching you be you.<br><br>I choose you today, tomorrow, and all the days after that."},
+      {tag:"Admire",type:"list",title:"Five Things I Adore",items:["Your laugh is my favorite sound.","You make simple things feel magical.","Your little attitude is dangerously cute.","You care deeper than you admit.","You are my favorite notification."]},
+      {tag:"Meme",type:"meme",top:"Me trying to focus",mid:"😤",bottom:"Her: hi",cap:"Productivity left the chat."},
+      {tag:"Shayari",type:"letter",title:"Kuch Alfaz Tere Liye",text:"Mohabbat hai isliye door reh kar bhi paas lagte ho,<br>tumhare khayalon mein hi meri duniya bas jaati hai."},
+      {tag:"Promise",type:"list",title:"My Promises",items:["I will choose you loudly and softly.","I will make you laugh on random days.","I will keep learning how to love you better.","I will protect your peace.","I will never make you feel alone on purpose."]}
+    ],
+    soft:[
+      {tag:"Comfort",type:"letter",title:"Sit With Me",img:"url('https://thumbs.dreamstime.com/b/heartwarming-anime-scene-unfolds-young-couple-close-under-shared-red-umbrella-gentle-rain-their-expressions-soft-363650832.jpg')",text:"My love,<br><br>You do not have to perform happiness for me. Come exactly as you are. Heavy, quiet, tired, emotional - I will still hold your heart carefully."},
+      {tag:"Seen",type:"list",title:"Things I Want You To Remember",items:["You are not too much.","You are not difficult to love.","Your softness is not weakness.","This feeling will pass.","I am still here."]},
+      {tag:"Meme Hug",type:"meme",top:"Her: I am sad",mid:"🏃‍♂️💨",bottom:"Me: on my way",cap:"Emotion emergency response."},
+      {tag:"Shayari",type:"letter",title:"Yeh Raat Bhi Guzar Jayegi",text:"Aandhiyon mein bhi jo saath rahe,<br>wahi log asli mohabbat hote hain."},
+      {tag:"Promise",type:"list",title:"For The Hard Days",items:["I will sit with you in silence.","I will remind you who you are.","I will hold the heavy with you.","I will not rush your healing.","I will love you through the low moments."]}
+    ],
+    hug:[
+      {tag:"Warmth",type:"letter",title:"The Biggest Hug",img:"url('https://images.splitshire.com/full/A-Surprised-Girl-Receiving-Love-Letter-under-Sakura_QmA2T.png')",text:"My love,<br><br>Imagine my arms around you right now. No pressure. No noise. Just warmth, safety, and the kind of quiet that says: I have got you."},
+      {tag:"Soft Things",type:"list",title:"Why You Deserve To Be Held",items:["You give so much love.","You feel everything deeply.","You are brave when you ask for comfort.","Your heart is beautiful.","You deserve softness without earning it."]},
+      {tag:"Meme",type:"meme",top:"Her: hug?",mid:"🤗",bottom:"Me: already attached",cap:"No release date announced."},
+      {tag:"Shayari",type:"letter",title:"Teri Baahon Ka Sukoon",text:"Teri baahon mein woh sukoon mila mujhe,<br>jo dua karte karte bhi nahi mila tha."},
+      {tag:"Promise",type:"list",title:"Always Open Arms",items:["I will never make you ask twice for comfort.","I will hold you until the feeling softens.","I will be gentle with your heart.","I will be home when the world feels loud.","I will send hugs even through a screen."]}
+    ],
+    calm:[
+      {tag:"Breathe",type:"breathe",title:"Breathe With Me",text:"You do not need to solve everything right now. Breathe in. Hold. Breathe out. I am here."},
+      {tag:"Grounding",type:"list",title:"Right Now",items:["You are safe in this moment.","Your thoughts are loud, not always true.","One small breath is enough.","You can slow down.","I am not going anywhere."]},
+      {tag:"Meme",type:"meme",top:"Overthinking at 3am",mid:"🌀",bottom:"Me: sleep, my love",cap:"Management has declined the spiral."},
+      {tag:"Shayari",type:"letter",title:"Sukoon",text:"Zindagi ki bhaag daud mein gar thak jaao kabhi,<br>yaad rakhna teri raah mein main khada hoon."},
+      {tag:"Promise",type:"list",title:"I Have Got You",items:["I will listen before fixing.","I will be patient with your pauses.","I will remind you to breathe.","I will love you through confusion.","I will be steady when your mind feels stormy."]}
+    ]
+  },
+  init(){this.liked=false;State.expIndex=0;this.render()},
+  list(){return this.data[this.group()]},
+  render(){const exps=this.list(),exp=exps[State.expIndex];$("exp-progress").innerHTML=exps.map((_,i)=>`<span class="exp-dot ${i<State.expIndex?"done":i===State.expIndex?"active":""}"></span>`).join("");$("exp-tag").textContent=`${State.moodEmoji||"💖"} ${exp.tag}`;$("like-btn").className="like-btn";$("like-btn").textContent="🤍 I loved this";this.liked=false;$("exp-next").textContent=State.expIndex===exps.length-1?"Complete 5 experiences and continue to wheel":"Next experience";this.content(exp)},
+  content(exp){const el=$("exp-content");let art=exp.img?`<div class="exp-art" style="--img:${exp.img}"></div>`:"";if(exp.type==="letter")el.innerHTML=`${art}<h3>${exp.title}</h3><div class="letter">${exp.text}</div>`;if(exp.type==="list")el.innerHTML=`<h3>${exp.title}</h3><div class="list">${exp.items.map(i=>`<div class="pill">💖 ${i}</div>`).join("")}</div>`;if(exp.type==="meme")el.innerHTML=`<h3>A Meme For Us</h3><div class="meme"><div class="top">${exp.top}</div><div class="mid">${exp.mid}</div><div class="bottom">${exp.bottom}</div><p class="small mt1">${exp.cap}</p></div>`;if(exp.type==="breathe")el.innerHTML=`<h3>${exp.title}</h3><p>${exp.text}</p><div class="breathe">In<br>Hold<br>Out</div>`},
+  like(){if(this.liked)return;this.liked=true;State.likedExps++;Store.save();$("like-btn").classList.add("liked");$("like-btn").textContent="💖 Loved";Particles.burst(innerWidth/2,innerHeight/2,24)},
+  next(){if(State.expIndex<this.list().length-1){State.expIndex++;Store.save();this.render()}else App.goTo("wheel")}
+};
+const Wheel={
+  canvas:null,ctx:null,spinning:false,angle:0,
+  segments:[
+    ["💋 Kiss","#e8275a","A kiss for you. Close your eyes and receive it.","https://w0.peakpx.com/wallpaper/355/331/HD-wallpaper-blooming-kiss-blossom-dress-anime-pink-kiss-couple-cherry.jpg"],
+    ["🌹 Rose","#ff74a2","A rose for the most beautiful person in my world.","https://w0.peakpx.com/wallpaper/104/496/HD-wallpaper-cute-anime-couple-couple-fore-head-kiss-couple-forehead-kiss.jpg"],
+    ["❓ Question","#f19932","Question: what is your favorite memory of us so far?","https://w0.peakpx.com/wallpaper/835/22/HD-wallpaper-love-letter-anime-girl-school-uniform-romance-brown-hair-sunset-scenic-anime.jpg"],
+    ["🔥 Dare","#c81242","Dare: screenshot this and send me 'I found your secret'.","https://is.zobj.net/image-server/v1/images?r=ArpLL26HLWzAuGNGb9GJZnY1RvlMzrayEE15yzYksAL6vqn8eoJ9rw7PnHbAoPd1kIC1O90CtSgkH-jiwnkzK6S-0kTxeOYnb5gq7RMQhXhfrApSj8YMJou3J1qKpTbD39By31S3quroCRWA21BDlvfDPp8j3nrspiJIbSLeeLZdjwt0fFKP0mC5YxGtqrDnmfyBdbfMhB5Zv4lapuludVdGwCMhJo3D0rL0Js4MBq-CeLx-aoYAqddU8E"],
+    ["💭 Memory","#8b5cf6","Memory: that first hug on 11/10 still lives in my chest.","https://w0.peakpx.com/wallpaper/679/131/HD-wallpaper-walking-together-at-sunset-anime-guy-anime-couple-couple-anime-taki-townscape-sunset-winter-miyamizu-taki-tachibana-kimi-no-na-wa-tachibana-cityscape-mitsuha-miyamizu-mitsuha-arm-in-arm.jpg"],
+    ["🌟 Wish","#3498db","My wish: a day where you feel loved from morning to night.","https://img.freepik.com/premium-photo/anime-couple-dancing-moonlight-with-aurora-lights-generative-ai_1034559-66996.jpg"]
+  ],
+  init(){this.canvas=$("wheel-canvas");this.ctx=this.canvas.getContext("2d");this.draw()},
+  draw(){const ctx=this.ctx,w=this.canvas.width,c=w/2,r=w/2-22,seg=Math.PI*2/this.segments.length;ctx.clearRect(0,0,w,w);this.segments.forEach((s,i)=>{ctx.beginPath();ctx.moveTo(c,c);ctx.arc(c,c,r,i*seg,(i+1)*seg);ctx.closePath();ctx.fillStyle=s[1];ctx.fill();ctx.strokeStyle="rgba(255,255,255,.35)";ctx.lineWidth=2;ctx.stroke();ctx.save();ctx.translate(c,c);ctx.rotate(i*seg+seg/2);ctx.textAlign="right";ctx.fillStyle="#fff";ctx.font="bold 21px Nunito";ctx.fillText(s[0],r-18,7);ctx.restore()});ctx.beginPath();ctx.arc(c,c,32,0,7);ctx.fillStyle="#fff";ctx.fill();ctx.fillStyle="#e8275a";ctx.font="900 14px Nunito";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("SPIN",c,c)},
+  spin(){if(this.spinning)return;this.spinning=true;$("spin-btn").textContent="Spinning...";$("wheel-result").classList.remove("show");const target=this.angle+(5+Math.random()*4)*Math.PI*2+Math.random()*Math.PI*2;this.canvas.style.transform=`rotate(${target}rad)`;this.angle=target%(Math.PI*2);setTimeout(()=>{this.spinning=false;$("spin-btn").textContent="Spin again";const seg=Math.PI*2/this.segments.length,norm=(Math.PI*2-this.angle)%(Math.PI*2),idx=Math.floor(norm/seg)%this.segments.length,res=this.segments[idx];State.wheelResult=res[0];Store.save();$("wheel-result").innerHTML=`<img src="${res[3]}" alt=""><div style="font-size:2rem">${res[0].split(" ")[0]}</div><div>${res[2]}</div>`;$("wheel-result").classList.add("show");$("wheel-next").style.display="inline-flex";Particles.burst(innerWidth/2,innerHeight/2,34)},4200)}
+};
+const Kiss={
+  init(){const map={happy:"You are my sunshine. Tap every kiss like I mean it, because I do.",inlove:"I am so in love with you it is almost unfair.",playful:"Playful today? Good. This button is dangerous.",sad:"Even on sad days, I will find ways to make you feel loved.",missing:"Every kiss says: I miss you.",hug:"A kiss for every hug I wish I could give you."};$("kiss-text").textContent=map[State.mood]||"You are my peace, my chaos, my home, and my adventure. I am yours.";$("kiss-count").textContent=State.kisses},
+  tap(){State.kisses++;Store.save();$("kiss-count").textContent=State.kisses;Particles.burst(innerWidth/2,innerHeight/2,48);["💋","I love you","Mwah","Forever yours","💖"].forEach((t,i)=>setTimeout(()=>{const e=document.createElement("div");e.className="echo-text";e.textContent=t;e.style.left=rand(18,72)+"%";e.style.top="50%";$("echo-container").appendChild(e);setTimeout(()=>e.remove(),2100)},i*240));if(navigator.vibrate)navigator.vibrate([40,60,40])}
+};
+const Draw={
+  c:null,ctx:null,drawing:false,color:"#e8275a",size:5,reactions:["😍 Obsessed","🥺 Emotional","😂 LOL","🔥 Loved it","💖 Speechless","🤗 Warm inside"],
+  init(){if(!this.c){this.c=$("draw-canvas");this.ctx=this.c.getContext("2d");this.ctx.lineCap="round";this.ctx.lineJoin="round";this.c.addEventListener("mousedown",e=>this.start(e.offsetX,e.offsetY));this.c.addEventListener("mousemove",e=>this.move(e.offsetX,e.offsetY));addEventListener("mouseup",()=>this.end());this.c.addEventListener("touchstart",e=>{e.preventDefault();const r=this.c.getBoundingClientRect();this.start(e.touches[0].clientX-r.left,e.touches[0].clientY-r.top)});this.c.addEventListener("touchmove",e=>{e.preventDefault();const r=this.c.getBoundingClientRect();this.move(e.touches[0].clientX-r.left,e.touches[0].clientY-r.top)});this.c.addEventListener("touchend",()=>this.end())}$("react-bar").innerHTML=this.reactions.map(r=>`<button class="react-btn ${State.reaction===r?"selected":""}" onclick="Draw.react(this,'${r}')">${r}</button>`).join("")},
+  react(btn,r){document.querySelectorAll(".react-btn").forEach(b=>b.classList.remove("selected"));btn.classList.add("selected");State.reaction=r;Store.save();toast(`${r} saved`)},
+  start(x,y){this.drawing=true;this.ctx.beginPath();this.ctx.moveTo(x,y)},move(x,y){if(!this.drawing)return;this.ctx.lineTo(x,y);this.ctx.strokeStyle=this.color;this.ctx.lineWidth=this.size;this.ctx.stroke();State.drewSomething=true;Store.save()},end(){this.drawing=false},
+  setColor(b){document.querySelectorAll(".color-dot").forEach(x=>x.classList.remove("active"));b.classList.add("active");this.color=b.dataset.c},setSize(v){this.size=+v},clear(){this.ctx.clearRect(0,0,this.c.width,this.c.height);State.drewSomething=false;Store.save()},save(){const a=document.createElement("a");a.download="my-heart.png";a.href=this.c.toDataURL();a.click();toast("Drawing saved")},
+  sendMsg(){const msg=$("msg-input").value.trim();const body=encodeURIComponent(`MESSAGE FROM HER\n\nMood: ${State.moodLabel||State.mood||"not selected"} ${State.moodEmoji||""}\nLoved experiences: ${State.likedExps}\nWheel result: ${State.wheelResult||"not spun"}\nKisses sent: ${State.kisses}\nReaction: ${State.reaction||"none"}\nDrew something: ${State.drewSomething?"Yes":"No"}\n\nHer message:\n"${msg||"(No written message)"}"\n\nSent from the Only Yours website.`);const subject=encodeURIComponent("She replied from Only Yours");window.location.href=`mailto:${CONFIG.EMAIL_TO}?subject=${subject}&body=${body}`;State.sentMsg=true;Store.save();setTimeout(()=>App.goTo("summary"),900)}
+};
+const Summary={
+  init(){$("sum-mood").textContent=State.moodEmoji||"-";$("sum-liked").textContent=State.likedExps;$("sum-kisses").textContent=State.kisses;$("sum-reaction").textContent=State.reaction?State.reaction.split(" ")[0]:"-";const bits=[];bits.push(`You came in feeling ${State.moodLabel||"something only your heart knows"}, and I built this little journey around that.`);if(State.loveLanguage)bits.push(`Your love language is ${State.loveLanguage} — I will remember that forever.`);if(State.likedExps)bits.push(`You loved ${State.likedExps} experience${State.likedExps===1?"":"s"}, so yes, I am saving that in my heart.`);if(State.wheelResult)bits.push(`The wheel gave you ${State.wheelResult}, which feels exactly like the universe flirting with us.`);if(State.kisses)bits.push(`You sent ${State.kisses} kiss${State.kisses===1?"":"es"}. I am pretending to be normal about that.`);if(State.reaction)bits.push(`Your reaction was "${State.reaction}", and that made this whole thing feel alive.`);if(State.drewSomething)bits.push("And you drew something, which means a piece of you touched the page.");$("summary-msg").textContent=bits.join(" ");$("summary-sub").textContent=State.sentMsg?"Your reply is ready in email.":"You can still send your reply from the canvas page whenever you want."}
+};
+const Return={
+  init(){$("ret-streak").textContent=State.streak;$("ret-visits").textContent=State.visits;$("ret-mood").textContent=State.moodEmoji||"-";$("ret-kisses").textContent=State.kisses;const msgs=["I will be right here when you come back.","Every visit makes my heart fuller.","Come back tomorrow. There is always more love.","Go conquer the world. I will be waiting."];if(State.loveLanguage)msgs.push(`I know now that you feel love through ${State.loveLanguage}. I will never forget.`);$("return-msg").textContent=randItem(msgs)}
+};
+const Share={
+  init(){const url=location.href.replace(/#.*$/,"");$("share-url").textContent=url;const box=$("qr-box");box.innerHTML="";try{new QRCode(box,{text:url,width:130,height:130,colorDark:"#e8275a",colorLight:"#fffafd",correctLevel:QRCode.CorrectLevel.M})}catch(e){box.innerHTML="💖"}},
+  copy(){navigator.clipboard?.writeText(location.href).then(()=>toast("Link copied")).catch(()=>toast("Copy the link manually"))}
+};
+
+const Quiz={
+  questions:[
+    {q:"When you are upset, what helps most?",opts:["Words of comfort","Being held silently","A surprise gift","Quality time together","A favor that helps me"]},
+    {q:"What makes you feel most special?",opts:["A long heartfelt message","A warm tight hug","A thoughtful present","An entire day just us","Them doing something for me"]},
+    {q:"How do you usually show love?",opts:["I say it out loud","I stay close physically","I give little things","I clear my schedule","I help without being asked"]},
+    {q:"What would melt your heart right now?",opts:["A voice note saying they miss me","Cuddling until I fall asleep","A handwritten letter","A spontaneous date night","Them handling my stress"]},
+    {q:"What hurts you most in love?",opts:["Harsh words or silence","No physical closeness","Forgotten gestures","Feeling like an option","Being left to struggle alone"]}
+  ],
+  labels:["Words of Affirmation","Physical Touch","Receiving Gifts","Quality Time","Acts of Service"],
+  current:0,scores:[0,0,0,0,0],
+  init(){
+    this.current=0;this.scores=[0,0,0,0,0];
+    this.render();
+  },
+  render(){
+    const q=this.questions[this.current];
+    $("quiz-progress").innerHTML=this.questions.map((_,i)=>`<span class="quiz-dot ${i<this.current?"done":i===this.current?"active":""}"></span>`).join("");
+    $("quiz-content").innerHTML=`<div class="quiz-q">${this.current+1}. ${q.q}</div><div class="quiz-wrap">${q.opts.map((o,i)=>`<button class="quiz-opt" onclick="Quiz.pick(${i})">${o}</button>`).join("")}</div>`;
+  },
+  pick(idx){
+    this.scores[idx]++;
+    document.querySelectorAll(".quiz-opt")[idx].classList.add("selected");
+    setTimeout(()=>{
+      if(this.current<this.questions.length-1){this.current++;this.render()}
+      else this.finish();
+    },350);
+  },
+  finish(){
+    const max=Math.max(...this.scores);
+    const langIdx=this.scores.indexOf(max);
+    State.loveLanguage=this.labels[langIdx];
+    State.loveLanguageIdx=langIdx;
+    Store.save();
+    const notes={
+      0:"I will never let a day pass without telling you what you mean to me.",
+      1:"I will hold you like the world might end tomorrow.",
+      2:"Every little thing I give you carries a piece of my heart.",
+      3:"You will always be my priority. Not an option. Not a plan B.",
+      4:"I will carry your burdens so you do not have to carry them alone."
+    };
+    $("quiz-content").innerHTML=`<div class="quiz-result"><b>Your Love Language: ${State.loveLanguage}</b><p>${notes[langIdx]}</p></div><button class="btn w100 mt2" onclick="App.goTo('experiences')">Continue to your experiences</button>`;
+    Particles.burst(innerWidth/2,innerHeight/2,36);
+  }
+};
+
+const Constellation={
+  canvas:null,ctx:null,
+  stars:[],
+  init(){
+    this.canvas=$("constellation-canvas");
+    this.ctx=this.canvas.getContext("2d");
+    this.resize();
+    addEventListener("resize",()=>this.resize());
+    this.generateStars();
+    this.animate();
+  },
+  resize(){
+    const rect=this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width=rect.width;this.canvas.height=rect.height;
+  },
+  generateStars(){
+    this.stars=[];
+    const w=this.canvas.width,h=this.canvas.height;
+    const seed=61;
+    const count=48;
+    for(let i=0;i<count;i++){
+      const x=((Math.sin(seed+i*137.5)+1)/2)*w;
+      const y=((Math.cos(seed+i*89.7)+1)/2)*h;
+      const r=Math.random()*2.2+0.8;
+      const a=Math.random()*0.6+0.4;
+      this.stars.push({x,y,r,a,blink:Math.random()*0.02+0.005,phase:Math.random()*Math.PI*2});
+    }
+    this.heartStars=[0,5,12,18,25,35];
+  },
+  animate(){
+    const ctx=this.ctx,w=this.canvas.width,h=this.canvas.height;
+    ctx.clearRect(0,0,w,h);
+    this.stars.forEach((s,i)=>{
+      s.phase+=s.blink;
+      const alpha=s.a*(0.6+0.4*Math.sin(s.phase));
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,230,240,${alpha})`;ctx.fill();
+      if(this.heartStars.includes(i)){
+        ctx.beginPath();ctx.arc(s.x,s.y,s.r*4,0,Math.PI*2);
+        ctx.fillStyle=`rgba(255,116,162,${alpha*0.15})`;ctx.fill();
+      }
+    });
+    const heart=this.heartStars.map(i=>this.stars[i]);
+    ctx.strokeStyle="rgba(255,116,162,0.35)";ctx.lineWidth=1.2;
+    ctx.beginPath();
+    ctx.moveTo(heart[0].x,heart[0].y);
+    for(let i=1;i<heart.length;i++)ctx.lineTo(heart[i].x,heart[i].y);
+    ctx.closePath();ctx.stroke();
+    ctx.fillStyle="rgba(255,200,220,0.9)";ctx.font="900 18px Nunito";
+    ctx.textAlign="center";ctx.fillText("A",heart[0].x,heart[0].y-12);
+    requestAnimationFrame(()=>this.animate());
+  }
+};
+
+const Garden={
+  canvas:null,ctx:null,flowers:[],
+  flowerTypes:["🌹","🌸","🌺","🌷","🌻","💐","🪷","🏵️","🌼","🌿"],
+  colors:["#e8275a","#ff74a2","#f19932","#ff9ec0","#ff7a2f","#c81242","#ff8ab0","#e25d44","#ff6b9d","#d61f43"],
+  init(){
+    this.canvas=$("garden-canvas");
+    this.ctx=this.canvas.getContext("2d");
+    this.resize();
+    addEventListener("resize",()=>{this.resize();this.draw()});
+    this.loadFlowers();
+    this.draw();
+    this.updateInfo();
+  },
+  resize(){
+    const rect=this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width=rect.width;this.canvas.height=rect.height;
+  },
+  loadFlowers(){
+    const total=(State.visits||1)+(State.streak||0);
+    this.flowers=[];
+    const seed=total*7+13;
+    for(let i=0;i<total;i++){
+      const x=((Math.sin(seed+i*137)+1)/2)*0.85+0.075;
+      const y=((Math.cos(seed+i*89)+1)/2)*0.6+0.25;
+      const type=i%this.flowerTypes.length;
+      const size=0.7+Math.sin(seed+i)*0.4;
+      this.flowers.push({x,y,type,size,sway:Math.random()*0.02+0.005,phase:Math.random()*Math.PI*2});
+    }
+  },
+  draw(){
+    const ctx=this.ctx,w=this.canvas.width,h=this.canvas.height;
+    ctx.clearRect(0,0,w,h);
+    const sky=ctx.createLinearGradient(0,0,0,h);
+    sky.addColorStop(0,"#e8f5e9");sky.addColorStop(0.6,"#c8e6c9");sky.addColorStop(1,"#a5d6a7");
+    ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
+    ctx.beginPath();ctx.arc(w*0.85,h*0.15,28,0,Math.PI*2);
+    ctx.fillStyle="rgba(255,200,100,0.35)";ctx.fill();
+    ctx.beginPath();ctx.ellipse(w/2,h*0.88,w*0.55,h*0.18,0,0,Math.PI*2);
+    ctx.fillStyle="#81c784";ctx.fill();
+    this.flowers.forEach(f=>{
+      f.phase+=f.sway;
+      const fx=f.x*w+Math.sin(f.phase)*6;
+      const fy=f.y*h;
+      ctx.strokeStyle="#4caf50";ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(fx,fy);ctx.lineTo(fx,fy+18);ctx.stroke();
+      ctx.font=`${22*f.size}px Nunito`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(this.flowerTypes[f.type],fx,fy-4);
+    });
+  },
+  updateInfo(){
+    const total=this.flowers.length;
+    const msg=total===1?"One flower. The beginning of everything.":total<5?`${total} flowers. Our garden is growing.`:`${total} flowers. Our love is a whole garden now.`;
+    $("garden-info").textContent=msg;
+  }
+};
+
+document.addEventListener("DOMContentLoaded",()=>{try{Particles.init();Entry.init();setTimeout(()=>{const p=$("preloader");if(p)p.classList.add("done")},900);App.nav();App.progress()}catch(e){console.error(e)}document.addEventListener("keydown",e=>{if(e.key==="ArrowRight")App.next();if(e.key==="ArrowLeft")App.prev()});document.addEventListener("dblclick",e=>Particles.burst(e.clientX,e.clientY,18))});
+</script>
+</body>
+</html>
